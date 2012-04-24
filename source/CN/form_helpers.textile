@@ -344,11 +344,11 @@ output:
 
 When parsing POSTed data, Rails will take into account the special +_method+ parameter and acts as if the HTTP method was the one specified inside it ("PATCH" in this example).
 
-h3. Making Select Boxes with Ease
+h3. 让 Select Boxes 更简单
 
-Select boxes in HTML require a significant amount of markup (one +OPTION+ element for each option to choose from), therefore it makes the most sense for them to be dynamically generated.
+HTML 中的 Select boxes 需要填写很多参数 ( 比如每个选择都需要一个 +OPTION+ 元素), 为了解放生产力, 我们还是让 Rails 来自动生成它们吧
 
-Here is what the markup might look like:
+HTML 代码看起来大概是这样
 
 <html>
 <select name="city_id" id="city_id">
@@ -359,17 +359,17 @@ Here is what the markup might look like:
 </select>
 </html>
 
-Here you have a list of cities whose names are presented to the user. Internally the application only wants to handle their IDs so they are used as the options' value attribute. Let's see how Rails can help out here.
+现在你有一个城市名单, 城市名将成为用户的属性. 你知道的, Rails 更喜欢存储城市的 ID, 所以 ID 会被填写再选项的 value 值上. 让我们看看 Rails 是怎么处理这些的吧.
 
-h4. The Select and Option Tags
+h4. Select 和 Option 标签
 
-The most generic helper is +select_tag+, which -- as the name implies -- simply generates the +SELECT+ tag that encapsulates an options string:
+最常用的辅助代码 (helper) 是 +select_tag+, 就像这个名字暗示的那样, 它会产生一个 +SELECT+ 标签以及包含在其中的 +option+ 标签
 
 <erb>
 <%= select_tag(:city_id, '<option value="1">Lisbon</option>...') %>
 </erb>
 
-This is a start, but it doesn't dynamically create the option tags. You can generate option tags with the +options_for_select+ helper:
+下面让我们用 +options_for_select+ 辅助代码来动态生成 option 标签
 
 <erb>
 <%= options_for_select([['Lisbon', 1], ['Madrid', 2], ...]) %>
@@ -381,15 +381,15 @@ output:
 ...
 </erb>
 
-The first argument to +options_for_select+ is a nested array where each element has two elements: option text (city name) and option value (city id). The option value is what will be submitted to your controller. Often this will be the id of a corresponding database object but this does not have to be the case.
++options_for_select+ 的第一个参数是一个嵌套的数组, 每条记录都有两个元素: 选项名(option text, 也就是城市名) 以及选项值(option value, 也就是城市 id). 选项值会被传递给 controller. 嗯, 通常来说, 这个值会与你数据库对象的 id 相同. 不过也请放心, 这并不是强制规定的.
 
-Knowing this, you can combine +select_tag+ and +options_for_select+ to achieve the desired, complete markup:
+知道这些后, 你可以使用 +select_tag+ 和 +options_for_select+ 来书写一个清晰简单的选择列表了:
 
 <erb>
 <%= select_tag(:city_id, options_for_select(...)) %>
 </erb>
 
-+options_for_select+ allows you to pre-select an option by passing its value.
++options_for_select+ 允许你设定一个默认选项, 只需要在最后传入一个默认的值, 就像这样:
 
 <erb>
 <%= options_for_select([['Lisbon', 1], ['Madrid', 2], ...], 2) %>
@@ -401,13 +401,13 @@ output:
 ...
 </erb>
 
-Whenever Rails sees that the internal value of an option being generated matches this value, it will add the +selected+ attribute to that option.
+当 Rails 看到最后这个参数后, 将会给拥有相同值的 +option+ 标签加上 +selected+ 属性.
 
-TIP: The second argument to +options_for_select+ must be exactly equal to the desired internal value. In particular if the value is the integer 2 you cannot pass "2" to +options_for_select+ -- you must pass 2. Be aware of values extracted from the +params+ hash as they are all strings.
+TIP: +option_for_select+ 的第二个参数必须要与你期望的默认值完全相等. 尤其是如果你想要的选项值是数字2, 那你就不能传入字符串 "2" 给 +options_for_select+ -- 你必须传入 2.
 
-h4. Select Boxes for Dealing with Models
+h4. 与 Model 关联的 Select Boxes
 
-In most cases form controls will be tied to a specific database model and as you might expect Rails provides helpers tailored for that purpose. Consistent with other form helpers, when dealing with models you drop the +_tag+ suffix from +select_tag+:
+大多数情况下, 表单都会和一个特定的数据库 model 捆绑在一起. 而且你也会希望 Rails 提供一些辅助方法来搞定这些数据上的问题. 跟其他的辅助方法一样的是, 当你删掉 +select_tag+ 的尾缀 +_tag+ 时:
 
 <ruby>
 # controller:
@@ -419,53 +419,53 @@ In most cases form controls will be tied to a specific database model and as you
 <%= select(:person, :city_id, [['Lisbon', 1], ['Madrid', 2], ...]) %>
 </erb>
 
-Notice that the third parameter, the options array, is the same kind of argument you pass to +options_for_select+. One advantage here is that you don't have to worry about pre-selecting the correct city if the user already has one -- Rails will do this for you by reading from the +@person.city_id+ attribute.
+留意第三个参数 —— 选项数组. 还记得么, 这就是你之前传递给 +options_for_select+ 的参数. 这样做的一个优势是你不用担心默认选择的城市 ）—— Rails 会选择与 +@person.city_id+ 相同的值作为默认.
 
-As with other helpers, if you were to use the +select+ helper on a form builder scoped to the +@person+ object, the syntax would be:
+就像其他的辅助方法, 如果你在一个 form_builder 里面使用 +select+ 辅助方法, 并且限定了 +@person+ 对象, 语法就变成了这样
 
 <erb>
 # select on a form builder
 <%= f.select(:city_id, ...) %>
 </erb>
 
-WARNING: If you are using +select+ (or similar helpers such as +collection_select+, +select_tag+) to set a +belongs_to+ association you must pass the name of the foreign key (in the example above +city_id+), not the name of association itself. If you specify +city+ instead of +city_id+ Active Record will raise an error along the lines of <tt> ActiveRecord::AssociationTypeMismatch: City(#17815740) expected, got String(#1138750) </tt> when you pass the +params+ hash to +Person.new+ or +update_attributes+. Another way of looking at this is that form helpers only edit attributes. You should also be aware of the potential security ramifications of allowing users to edit foreign keys directly. You may wish to consider the use of +attr_protected+ and +attr_accessible+. For further details on this, see the "Ruby On Rails Security Guide":security.html#mass-assignment.
+WARNING: 用 +select+ 方法(或者其他类似的辅助方法比如 +collection_select+, +select_tag+)来设定 +belongs_to+ 关系时, 你必须传入外键的名字 (就像例子里的 +city_id+), 而不是关联项目的名字. 如果你指定了 +city+ 而不是 +city_id+, 接着你传入了 +params+ 哈希给 +Person.new+ 或者 +update_attributes+ 时, Active Record 会抛出一个错误, 大概是这样: <tt> ActiveRecord::AssociationTypeMismatch: City(#17815740) expected, got String(#1138750) </tt>. 你还得小心一些潜在的安全隐患, 比如允许用户直接修改外键. 你可以使用 +attr_protected+ 和 +attr_accesssible+ 来控制 mass_assignment 的权限. 更多的安全相关细节, 请转向 "Ruby On Rails Security Guide":security.html#mass-assignment.
 
-h4. Option Tags from a Collection of Arbitrary Objects
+h4. 从任意的对象中生成 Option 标签
 
-Generating options tags with +options_for_select+ requires that you create an array containing the text and value for each option. But what if you had a City model (perhaps an Active Record one) and you wanted to generate option tags from a collection of those objects? One solution would be to make a nested array by iterating over them:
+你必须提供一个包含了文字和数值的数组给 +options_for_select+ 方法来生成 +option+ 标签. 但若你有一个 City model (一个 Active Record 记录), 而且你想使用这个 model 的实例集合(collection)来生成 +option+ 标签怎么办? 一种解决方案就是遍历整个嵌套的数组: 
 
 <erb>
 <% cities_array = City.all.map { |city| [city.name, city.id] } %>
 <%= options_for_select(cities_array) %>
 </erb>
 
-This is a perfectly valid solution, but Rails provides a less verbose alternative: +options_from_collection_for_select+. This helper expects a collection of arbitrary objects and two additional arguments: the names of the methods to read the option *value* and *text* from, respectively:
+这是一个很不错的解决方案, 但是 Rails 提供了更懒的方法(^_^): +options_from_collection_for_select+. 你可以提供任意的对象集合和两个额外的参数给这个辅助方法 —— 用来读取所需的 *value* 和 *text* 值:
 
 <erb>
 <%= options_from_collection_for_select(City.all, :id, :name) %>
 </erb>
 
-As the name implies, this only generates option tags. To generate a working select box you would need to use it in conjunction with +select_tag+, just as you would with +options_for_select+. When working with model objects, just as +select+ combines +select_tag+ and +options_for_select+, +collection_select+ combines +select_tag+ with +options_from_collection_for_select+.
+就像名字暗示的那样, 它只能产生 +option+ 标签. 就像之前的 +options_for_select+ 一样, 如果你想要一个正常的 +select box+, 你还是需要把它跟 +select_tag+ 一起使用. 就像 +select_tag+ 和 +options_for_select+ 组合成为 +select+ 一样, 当你处理 model 对象时, +collection_select+ 就是 +select_tag+ 和 +options_from_collection_for_select+ 的组合.
 
 <erb>
 <%= collection_select(:person, :city_id, City.all, :id, :name) %>
 </erb>
 
-To recap, +options_from_collection_for_select+ is to +collection_select+ what +options_for_select+ is to +select+.
+换一种说法, +options_from_collection_for_select+ 之于 +collection_select+, 就像 +options_for_select+ 之于 +select+.
 
-NOTE: Pairs passed to +options_for_select+ should have the name first and the id second, however with +options_from_collection_for_select+ the first argument is the value method and the second the text method.
+NOTE: 传递给 +options_for_select+ 的属性对应该是 +text+ 在前而 +value+ 在后. 但是对于 +options_from_collection_for_select+ 却是 +value+ 方法在前, +text+ 方法在后
 
-h4. Time Zone and Country Select
+h4. 选择时区和国家
 
-To leverage time zone support in Rails, you have to ask your users what time zone they are in. Doing so would require generating select options from a list of pre-defined TimeZone objects using +collection_select+, but you can simply use the +time_zone_select+ helper that already wraps this:
+为了在 Rails 中支持时区, 你得要求你的用户输入他们所在的时区. 这样就需要你根据预先定义的 TimeZone 对象列表, 用 +collection_select+ 生成一个 +select options+ 元素. 还好还好, Rails 又帮你做了这个准备, 赶快试试 +time_zone_select+ 辅助方法吧:
 
 <erb>
 <%= time_zone_select(:person, :time_zone) %>
 </erb>
 
-There is also +time_zone_options_for_select+ helper for a more manual (therefore more customizable) way of doing this. Read the API documentation to learn about the possible arguments for these two methods.
+当然, Rails 也提供了更容易自定义的方法 +time_zone_options_for_select+. 请阅读 API 文档来进一步学习.
 
-Rails _used_ to have a +country_select+ helper for choosing countries, but this has been extracted to the "country_select plugin":https://github.com/chrislerum/country_select. When using this, be aware that the exclusion or inclusion of certain names from the list can be somewhat controversial (and was the reason this functionality was extracted from Rails).
+Rails _曾经_ 还提供 +contry_select+ 辅助方法来选择国家, 但它已经被发配到 "country_select plugin":https://github.com/chrislerum/country_select 去了. 当你用它时呢, 小心里面的一些具有争议的名字. (嗯, 其实这就是它被发配的原因...)
 
 h3. Using Date and Time Form Helpers
 

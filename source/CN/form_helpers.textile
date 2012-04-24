@@ -1,21 +1,20 @@
-h2. Rails Form helpers
+h2. Rails 的表单辅助方法 (Rails Form helpers)
 
-Forms in web applications are an essential interface for user input. However, form markup can quickly become tedious to write and maintain because of form control naming and their numerous attributes. Rails deals away with these complexities by providing view helpers for generating form markup. However, since they have different use-cases, developers are required to know all the differences between similar helper methods before putting them to use.
+在网页应用中, 表单是用户输入的重要接口. 尽管如此, 面对表单中如此繁多的属性名和参数, 表单的编写和维护会很快的变得乏味无趣. 现在不同了, Rails 能帮助你来处理这些复杂的表单 —— 你只需要调用几个辅助方法, 一个你需要的表单就自动生成了. 额, 不过... 因为表单的需求是如此的多样化, 开发者也不得不先去了解那些个相似的辅助方法的区别, 才能更好的偷懒.
 
-In this guide you will:
+在这个向导里, 你会:
 
-* Create search forms and similar kind of generic forms not representing any specific model in your application
-* Make model-centric forms for creation and editing of specific database records
-* Generate select boxes from multiple types of data
-* Understand the date and time helpers Rails provides
-* Learn what makes a file upload form different
-* Learn some cases of building forms to external resources
-* Find out where to look for complex forms
+* 建立搜索表单以及各种没有与特定 model 绑定的表单
+* 建立绑定在 model 上的表单, 增加和修改特定的数据库记录
+* 从各种不同的数据中生成 +select boxes+
+* 理解 Rails 提供的各种日期和时间辅助方法
+* 理解需要上传文件的表单的不同, 是什么造成了不同
+* 学习如何为外部资源建立表单
+* 找到哪里可以学习更加复杂的表单写法
 
 endprologue.
 
-NOTE: This guide is not intended to be a complete documentation of available form helpers and their arguments. Please visit "the Rails API documentation":http://api.rubyonrails.org/ for a complete reference.
-
+NOTE: 这个向导并不准备成为一个完整的表单辅助方法以及他们的参数的可用文档. 完整的文档请访问 "the Rails API documentation":http://api.rubyonrails.org/
 
 h3. Dealing with Basic Forms
 

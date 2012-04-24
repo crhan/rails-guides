@@ -16,9 +16,9 @@ endprologue.
 
 NOTE: 这个向导并不准备成为一个完整的表单辅助方法以及他们的参数的可用文档. 完整的文档请访问 "the Rails API documentation":http://api.rubyonrails.org/
 
-h3. Dealing with Basic Forms
+h3. 处理基本表单
 
-The most basic form helper is +form_tag+.
+最简单也最基础的表单辅助方法就是 +form_tag+ 
 
 <erb>
 <%= form_tag do %>
@@ -26,7 +26,7 @@ The most basic form helper is +form_tag+.
 <% end %>
 </erb>
 
-When called without arguments like this, it creates a +&lt;form&gt;+ tag which, when submitted, will POST to the current page. For instance, assuming the current page is +/home/index+, the generated HTML will look like this (some line breaks added for readability):
+不包含任何参数的调用 +from_tag+ 会建立一个 POST 到本页的 +&lt;form&gt;+ 标签. 假设当前页是 +/home/index+, 那生成的 HTML 会看起来像下面这样(为了阅读方便, 另加了一些换行):
 
 <html>
 <form accept-charset="UTF-8" action="/home/index" method="post">
@@ -38,20 +38,22 @@ When called without arguments like this, it creates a +&lt;form&gt;+ tag which, 
 </form>
 </html>
 
-Now, you'll notice that the HTML contains something extra: a +div+ element with two hidden input elements inside. This div is important, because the form cannot be successfully submitted without it. The first input element with name +utf8+ enforces browsers to properly respect your form's character encoding and is generated for all forms whether their actions are "GET" or "POST". The second input element with name +authenticity_token+ is a security feature of Rails called *cross-site request forgery protection*, and form helpers generate it for every non-GET form (provided that this security feature is enabled). You can read more about this in the "Security Guide":./security.html#cross-site-request-forgery-csrf.
+现在, 你会注意到 HTML 里面包含了一些额外的标签: 包含了两个隐藏 input 元素的 +div+ 元素. 这个 div 十分重要, 提交的表格能不能被接受就看它的啦. 其中第一个叫做 +utf8+ 的 input 元素强制浏览器编码你的输入字符, 而且会被强制加入所有的表单中. 第二个 input 元素叫做 +authenticity_token+. 这是一个被 Rails 叫做 *跨站请求保护(cross-site request forgery protection)* 的安全特性, 并且会在所有非 GET 请求的表单中加入这个特性(用以提供安全特性). 你可以在 "安全向导(Security Guide)":./security.html#cross-site-request-forgery-csrf 里面找到更多细节.
+
+NOTE: 本文剩下的章节里, 包含了 hiddent input 元素的 +div+ 标签不再会在代码例子中出现.
 
 NOTE: Throughout this guide, the +div+ with the hidden input elements will be excluded from code samples for brevity.
 
-h4. A Generic Search Form
+h4. 普通的搜索表单
 
-One of the most basic forms you see on the web is a search form. This form contains:
+你在网页上看到的最基本的表单就是搜索表单, 他包含了
 
-# a form element with "GET" method,
-# a label for the input,
-# a text input element, and
-# a submit element.
+# 一个包含了 "GET" 方法的 form 元素
+# 一个提供给 input 的 label
+# 一个 text input 元素, 以及
+# 一个 submit 元素
 
-To create this form you will use +form_tag+, +label_tag+, +text_field_tag+, and +submit_tag+, respectively. Like this:
+你可以使用 +form_tag+, +label_tag+, +text_field_tag+ 和 +submit_tag+ 来创造表格, 就像这样:
 
 <erb>
 <%= form_tag("/search", :method => "get") do %>
@@ -61,7 +63,7 @@ To create this form you will use +form_tag+, +label_tag+, +text_field_tag+, and 
 <% end %>
 </erb>
 
-This will generate the following HTML:
+产生下面的 HTML:
 
 <html>
 <form accept-charset="UTF-8" action="/search" method="get">
@@ -71,11 +73,13 @@ This will generate the following HTML:
 </form>
 </html>
 
-TIP: For every form input, an ID attribute is generated from its name ("q" in the example). These IDs can be very useful for CSS styling or manipulation of form controls with JavaScript.
+TIP: Rails 会为每个表单的 input 产生一个 id 属性(这个例子里是 "q"). 这些 ID 会让你 CSS 样式定制和 JS 的表格操控带来不小的便利
+
+除了 +text_field_tag+ 和 +submit_tag+ 之外, 在 HTML 的每个表单控制里还有一些类似的辅助方法. (好难翻! 原文写在下面不删了)
 
 Besides +text_field_tag+ and +submit_tag+, there is a similar helper for _every_ form control in HTML.
 
-IMPORTANT: Always use "GET" as the method for search forms. This allows users to bookmark a specific search and get back to it. More generally Rails encourages you to use the right HTTP verb for an action.
+IMPORTANT: 请使用 "GET" 方法来提交搜索表单. 这样才能方便用户收藏他们的搜索页面. 更一般的说, Rails 鼓励大家使用正确的 HTTP verb 来处理一个 action.
 
 h4. Multiple Hashes in Form Helper Calls
 

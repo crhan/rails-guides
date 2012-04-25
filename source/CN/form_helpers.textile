@@ -628,49 +628,48 @@ The form builder used also determines what happens when you do
 
 If +f+ is an instance of FormBuilder then this will render the +form+ partial, setting the partial's object to the form builder. If the form builder is of class LabellingFormBuilder then the +labelling_form+ partial would be rendered instead.
 
-h3. Understanding Parameter Naming Conventions
+h3. 理解参数的命名约定
 
-As you've seen in the previous sections, values from forms can be at the top level of the +params+ hash or nested in another hash. For example in a standard +create+
-action for a Person model, +params[:model]+ would usually be a hash of all the attributes for the person to create. The +params+ hash can also contain arrays, arrays of hashes and so on.
+就像你在前面几个章节看到的那样, 表单里的值被放到了 +params+ 哈希的第一层, 或者嵌套着放进了别的哈希里. 比如创建 +Person model+ 的标准表单中, 哈希 +params[:model]+ 中通常包括了创建这个 +Person+ 所需的所有属性. 当然, 这个哈希也可以嵌套数组, 哈希数组等等.
 
-Fundamentally HTML forms don't know about any sort of structured data, all they generate is name–value pairs, where pairs are just plain strings. The arrays and hashes you see in your application are the result of some parameter naming conventions that Rails uses.
+基本的 HTML 表单是不会理解任何结构数据的, 它只是提供了很多仅包含平文本的 nave-value 对. 在你的应用中看到的哈希和数组仅仅是 Rails 中参数命名的约定而已.
 
-TIP: You may find you can try out examples in this section faster by using the console to directly invoke Racks' parameter parser. For example,
+TIP: 你可以在 console 下快速的尝试本节提供的例子: 直接调用 Racks' parameter parser
 
 <ruby>
 Rack::Utils.parse_query "name=fred&phone=0123456789"
 # => {"name"=>"fred", "phone"=>"0123456789"}
 </ruby>
 
-h4. Basic Structures
+h4. 基本结构
 
-The two basic structures are arrays and hashes. Hashes mirror the syntax used for accessing the value in +params+. For example if a form contains
+两个基本结构就是哈希和数组啦. +params+ 中取值的方法与哈希一致, 比如如果一个表单包含了:
 
 <html>
 <input id="person_name" name="person[name]" type="text" value="Henry"/>
 </html>
 
-the +params+ hash will contain
+那 +params+ 哈希就会有这样的数据:
 
 <erb>
 {'person' => {'name' => 'Henry'}}
 </erb>
 
-and +params[:person][:name]+ will retrieve the submitted value in the controller.
+接着你在 controller 就能用 +params[:person][:name] 就能取出提交的值.
 
-Hashes can be nested as many levels as required, for example
+哈希可以多层嵌套, 比如:
 
 <html>
 <input id="person_address_city" name="person[address][city]" type="text" value="New York"/>
 </html>
 
-will result in the +params+ hash being
+在 +params+ 里面大概是这样:
 
 <ruby>
 {'person' => {'address' => {'city' => 'New York'}}}
 </ruby>
 
-Normally Rails ignores duplicate parameter names. If the parameter name contains an empty set of square brackets [] then they will be accumulated in an array. If you wanted people to be able to input multiple phone numbers, you could place this in the form:
+一般来说 Rails 会忽视重复的参数名. 但如果参数名后面跟了一个空的中括号 +[]+, 那就会被当成数组来处理. 比如你想让用户输入多个电话号码, 你可以这样写表单
 
 <html>
 <input name="person[phone_number][]" type="text"/>
@@ -678,11 +677,11 @@ Normally Rails ignores duplicate parameter names. If the parameter name contains
 <input name="person[phone_number][]" type="text"/>
 </html>
 
-This would result in +params[:person][:phone_number]+ being an array.
+这样会让 +params[:person][:phone_number]+ 成为一个数组
 
-h4. Combining Them
+h4. 混合使用哈希和数组
 
-We can mix and match these two concepts. For example, one element of a hash might be an array as in the previous example, or you can have an array of hashes. For example a form might let you create any number of addresses by repeating the following form fragment
+我们可以将哈希和数组混合起来使用. 比如一个哈希元素可以在前一个例子里组成一个数组, 或者你也可以使用哈希数组. 比如这个表单可以让你创建很多个地址, 只要你不停的重复这一段:
 
 <html>
 <input name="addresses[][line1]" type="text"/>
@@ -690,17 +689,17 @@ We can mix and match these two concepts. For example, one element of a hash migh
 <input name="addresses[][city]" type="text"/>
 </html>
 
-This would result in +params[:addresses]+ being an array of hashes with keys +line1+, +line2+ and +city+. Rails decides to start accumulating values in a new hash whenever it encounters an input name that already exists in the current hash.
+结果是 +params[:addresses]+ 变成了一个由键 +line1+, +line2+ 和 +city+ 组成的哈希数组. Rails 会在遇到给已存在的键赋值的时候重开一个哈希.
 
-There's a restriction, however, while hashes can be nested arbitrarily, only one level of "arrayness" is allowed. Arrays can be usually replaced by hashes, for example instead of having an array of model objects one can have a hash of model objects keyed by their id, an array index or some other parameter.
+当然这样使用也是由限制的, 不管怎么说, 虽然哈希可以重复嵌套, 但是数组只能嵌套一层. 不过也不用担心, 数组总是能用哈希来代替. 比如用一个键为 id 的哈希就能替代前面使用的数组.
 
-WARNING: Array parameters do not play well with the +check_box+ helper. According to the HTML specification unchecked checkboxes submit no value. However it is often convenient for a checkbox to always submit a value. The +check_box+ helper fakes this by creating an auxiliary hidden input with the same name. If the checkbox is unchecked only the hidden input is submitted and if it is checked then both are submitted but the value submitted by the checkbox takes precedence. When working with array parameters this duplicate submission will confuse Rails since duplicate input names are how it decides when to start a new array element. It is preferable to either use +check_box_tag+ or to use hashes instead of arrays.
+WARNING: 数组参数对 +check_box+ 辅助方法并不友好. 根据 HTML 规定, 没有打钩的 checkboxes 提交的是无值(submit no value). 但是 Rails 约定一个 checkbox 总是要提交一个值. 所以 +check_box+ 方法就创建一个具有相同名字的隐藏的 input 来假装有值提交. 如果没有给 checkbox 打钩, 那只有这个隐藏的值被 Rails 接收. 若打钩了, 这两个值都会被提交, 但只有勾选的值会被处理. 如果你在这里使用了数组, 那 Rails 会被超过两个的相同名字的 input 给弄晕, 不知道怎么处理了. 解决方法是使用 +check_box_tag+ 或者直接用哈希来替代数组
 
-h4. Using Form Helpers
+h4. 使用表单辅助方法
 
-The previous sections did not use the Rails form helpers at all. While you can craft the input names yourself and pass them directly to helpers such as +text_field_tag+ Rails also provides higher level support. The two tools at your disposal here are the name parameter to +form_for+ and +fields_for+ and the +:index+ option that helpers take.
+前一节没有使用任何表单辅助方法. 你可以任意制定 input 名, 并且直接传给像 +text_field_tag+ 方法. Rails 同样提供了更加高层的支持. 这两个工具就是 +form_for+ 和 +fields_for+ 以及传给他们的 +:index+ 选项.
 
-You might want to render a form with a set of edit fields for each of a person's addresses. For example:
+你也许想要为用户的每一个地址创建一个编辑框, 比如:
 
 <erb>
 <%= form_for @person do |person_form| %>
@@ -713,7 +712,7 @@ You might want to render a form with a set of edit fields for each of a person's
 <% end %>
 </erb>
 
-Assuming the person had two addresses, with ids 23 and 45 this would create output similar to this:
+假设这个人有两个地址, id 分别为 23 和 45:
 
 <html>
 <form accept-charset="UTF-8" action="/people/1" class="edit_person" id="edit_person_1" method="post">
@@ -723,15 +722,15 @@ Assuming the person had two addresses, with ids 23 and 45 this would create outp
 </form>
 </html>
 
-This will result in a +params+ hash that looks like
+这样会建造一个像这样的 +params+ 哈希:
 
 <ruby>
 {'person' => {'name' => 'Bob', 'address' => {'23' => {'city' => 'Paris'}, '45' => {'city' => 'London'}}}}
 </ruby>
 
-Rails knows that all these inputs should be part of the person hash because you called +fields_for+ on the first form builder. By specifying an +:index+ option you're telling Rails that instead of naming the inputs +person[address][city]+ it should insert that index surrounded by [] between the address and the city. If you pass an Active Record object as we did then Rails will call +to_param+ on it, which by default returns the database id. This is often useful as it is then easy to locate which Address record should be modified. You can pass numbers with some other significance, strings or even +nil+ (which will result in an array parameter being created).
+因为你在 form builder 里面调用了 +fields_for+ 方法, Rails 知道所有的这些 input 都是 person 哈希里的一部分. 加上 +:index+ 选项后, Rails 就会知道你不是想要它把 input 取名为 +person[address][city]+, 而是在 address 和 city 间加入 +[]+. 如果你像例子那样传入了一个 Active Record 对象, 那 Rails 就会帮你调用对象的 +to_param+ 方法, 这个方法默认返回数据库的 id, 便于定位需要修改的记录. 你也可以传入其它有意义的数字, 字符串, 甚至 +nil+ (结果会是新建一个数组参数).
 
-To create more intricate nestings, you can specify the first part of the input name (+person[address]+ in the previous example) explicitly, for example
+你可以特别指定 input 名字的第一部分(前一例是 +person[address]+)来创造更加复杂的嵌套, 比如:
 
 <erb>
 <%= fields_for 'person[address][primary]', address, :index => address do |address_form| %>
@@ -739,15 +738,15 @@ To create more intricate nestings, you can specify the first part of the input n
 <% end %>
 </erb>
 
-will create inputs like
+会生成 input:
 
 <html>
 <input id="person_address_primary_1_city" name="person[address][primary][1][city]" type="text" value="bologna" />
 </html>
 
-As a general rule the final input name is the concatenation of the name given to +fields_for+/+form_for+, the index value and the name of the attribute. You can also pass an +:index+ option directly to helpers such as +text_field+, but it is usually less repetitive to specify this at the form builder level rather than on individual input controls.
+一般的, 最终生成的的 input 名字是传给 +field_for+/+form_for+, 和 index 值以及属性名的串接. 你也可以把 +:index+ 选项直接传给 +text_field+ 之类的辅助方法, 不过通常那些方法, 比起独立的 input 控制组件, 在 form builder 层面上不太会重复出现.
 
-As a shortcut you can append [] to the name and omit the +:index+ option. This is the same as specifying +:index => address+ so
+你可以在 name 后面加上 +[]+, 并忽略 +:index+ 选项, 效果与使用 +:index => address+ 相同, 所以...
 
 <erb>
 <%= fields_for 'person[address][primary][]', address do |address_form| %>
@@ -755,7 +754,7 @@ As a shortcut you can append [] to the name and omit the +:index+ option. This i
 <% end %>
 </erb>
 
-produces exactly the same output as the previous example.
+对于前一个例子, 这样也会产生完全一样的输出
 
 h3. Forms to external resources
 

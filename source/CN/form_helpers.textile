@@ -42,8 +42,6 @@ h3. 处理基本表单
 
 NOTE: 本文剩下的章节里, 包含了 hiddent input 元素的 +div+ 标签不再会在代码例子中出现.
 
-NOTE: Throughout this guide, the +div+ with the hidden input elements will be excluded from code samples for brevity.
-
 h4. 普通的搜索表单
 
 你在网页上看到的最基本的表单就是搜索表单, 他包含了
